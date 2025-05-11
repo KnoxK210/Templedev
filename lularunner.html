@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <audio id="background-music" src="https://github.com/KnoxK210/j0go/raw/refs/heads/main/background.mp3" loop></audio>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.9, maximum-scale=1.0, user-scalable=no">
+    
+<title>Ladrao Jumper</title>
+    
+</head>
+<body>
+    <div class="game-board">
+        <img src="https://codeberg.org/Konan/Gamejump/raw/branch/main/clouds.png" class="clouds">
+        <img src="https://codeberg.org/Konan/Gamejump/raw/branch/main/ground.png" class="ground">
+        <img src="https://codeberg.org/Konan/Gamejump/raw/branch/main/pipe.png" class="pipe">
+        <img src="https://codeberg.org/Konan/Tesknat/raw/branch/main/lula.gif" class="lula">
+
+    </div>
+    <audio id="jump-sound" src="https://github.com/KnoxK210/j0go/raw/refs/heads/main/jump.mp3"></audio>
+<audio id="collision-sound" src="https://github.com/KnoxK210/j0go/raw/refs/heads/main/collision.mp3"></audio>
+  <style>
+  
+body
+{background-color: black;
+  
+  
+}
+* {
+  margin: 0;
+  padding: 1px;
+  box-sizing: border-box;
+}
+
+.game-board {
+  width: 1000;
+  height: 500px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(#00CEEB, #E0F6FF);
+}
+
+/* O cenário se move via animação, mas será interrompido ao adicionar a classe "game-over" */
+.pipe {
+  position: absolute;
+  bottom: 0;
+  width: 125px;
+  left: 100%;
+  animation: pipe-animation 1.8s infinite linear;
+}
+
+.clouds {
+  position: absolute;
+  width: 550px;
+  top: 50px;
+  right: -550px;
+  animation: clouds-animation 20s infinite linear;
+}
+
+
+.lula {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  width: 130px;
+  transition: bottom 0.2s ease-out;
+}
+    .buta{
+      font-size:20px;
+    }
+
+/* A classe jump ainda pode ser usada para evitar pulos sobrepostos */
+.jump {
+  /* Sem animação CSS definida – o movimento é controlado via JS */
+}
+.ground {
+  position: absolute;
+  bottom: 0;
+  width: 200%;
+  height: 210px; /* Ajuste a altura conforme necessário */
+  left: 0;
+  animation: ground-animation 1.8s infinite linear;
+}
+
+/* Animação para o chão rolar */
+@keyframes ground-animation {
+  from {
+    left: 0;
+  }
+  to {
+    left: -100%;
+  }
+}
+
+/* Quando o jogo acabar, para a animação do chão */
+.game-over .ground {
+  animation: none;
+}
+
+@keyframes pipe-animation {
+  from {
+    left: 100%;
+  }
+  to {
+    left: -80px;
+  }
+}
+
+@keyframes clouds-animation {
+  from {
+    right: -550px;
+  }
+  to {
+    right: 100%;
+  }
+}
+
+/* Ao final do jogo, interrompemos as animações do cenário */
+.game-over .pipe,
+.game-over .clouds {
+  animation: none;
+}
+</style>
+  <script>
+   const lula = document.querySelector('.lula');
+const pipe = document.querySelector('.pipe');
+const clouds = document.querySelector('.clouds');
+const gameBoard = document.querySelector('.game-board');
+const jumpSound = document.getElementById('jump-sound');
+const collisionSound = document.getElementById('collision-sound');
+const backgroundMusic = document.getElementById('background-music');
+
+function startGame() {
+    if (!gameOver) {
+        backgroundMusic.play();
+    }
+}
+function restartGame() {
+    gameOver = false;
+
+    // Resetando as posições do lula e do Pipe
+    lula.src = 'https://codeberg.org/Konan/Tesknat/raw/branch/main/lula.gif';
+    lula.style.bottom = '0px';
+    lula.style.width = 'auto';
+    lula.style.marginLeft = '0px';
+
+    pipe.style.left = '100%'; // Volta o cano para a posição inicial
+
+    // Remove a classe de Game Over
+    gameBoard.classList.remove('game-over');
+
+    // Reinicia a física e a detecção de colisão
+    requestAnimationFrame(updatePhysics);
+    requestAnimationFrame(gameLoop);
+}
+
+// Adiciona o evento para reiniciar após game over
+document.addEventListener('keydown', () => {
+    if (gameOver) restartGame();
+});
+document.addEventListener('touchstart', () => {
+    if (gameOver) restartGame();
+});
+
+document.addEventListener('keydown', startGame);
+document.addEventListener('touchstart', startGame);
+
+
+let gameOver = false;
+
+// Variáveis de física para o pulo do lula
+let lulaY = 0;          // Posição vertical atual (em pixels)
+let velocityY = 0;       // Velocidade vertical atual
+let isJumping = false;   // Indica se o lula está em pulo
+
+// Parâmetros da física – ajuste conforme necessário para o comportamento desejado
+const gravity = -1.1;    // Aceleração da gravidade (valor negativo)
+const jumpImpulse = 27;  // Impulso inicial do pulo
+
+// Função que atualiza a física do lula frame a frame
+function updatePhysics() {
+  if (isJumping) {
+    velocityY += gravity;       // Atualiza a velocidade com a gravidade
+    lulaY += velocityY;          // Atualiza a posição com base na velocidade
+
+    // Se lula atingir ou ultrapassar o chão, corrige para 0 e permite novo pulo
+    if (lulaY <= 0) {
+      lulaY = 0;
+      isJumping = false;
+      velocityY = 0;
+    }
+    
+
+    // Atualiza o estilo inline do lula para refletir a nova posição
+    lula.style.bottom = lulaY + 'px';
+  }
+  if (!gameOver) {
+    requestAnimationFrame(updatePhysics);
+  }
+}
+
+// Inicia o loop de física
+requestAnimationFrame(updatePhysics);
+
+// Função de pulo – só inicia se o lula não estiver no ar
+function jump() {
+  if (gameOver) return;
+  if (!isJumping) {
+    isJumping = true;
+    velocityY = jumpImpulse;
+    jumpSound.currentTime = 0; // Reinicia o som para toques seguidos
+    jumpSound.play(); // Toca o som de pulo
+  }
+}
+
+// Eventos para desktop e mobile
+document.addEventListener('keydown', jump);
+document.addEventListener('touchstart', jump);
+
+// Loop de verificação de colisão utilizando requestAnimationFrame
+function gameLoop() {
+  if (gameOver) return;
+  
+  // Obtemos a posição do pipe em relação à viewport
+  const pipeRect = pipe.getBoundingClientRect();
+  
+  //ESSE CODIGO PARA PERTO DA GARRAFA Se o pipe estiver na faixa de colisão e o lula estiver baixo o bastante...
+ if (pipeRect.left <= 120 && pipeRect.left > 0 && lulaY < 140) {
+  gameOver = true;
+  gameBoard.classList.add('game-over');
+  
+  // Som de colisão
+  collisionSound.play();
+
+  // Alteração visual para game over
+  lula.src = 'https://codeberg.org/Konan/Gamejump/raw/branch/main/game-over.png';
+  lula.style.width = '159px';
+  lula.style.marginLeft = '70px';
+  return;
+}
+  
+  requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
+  </script>
+ <!---<button class="buta"> <a href="index.html">volttar</a></button>--->
+</body>
+</html>
