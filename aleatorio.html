@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+  <body>
+    <button class="bott"><a href="index.html" style="text-decoration:none;">Voltar</a></button>
+    <center>
+    <h1 class="cab">
+<span style="color:blue; font-weight:bold;">Nada aqui por enquanto</span></h1>
+
+      <img class="im" src="https://miro.medium.com/v2/resize:fit:1098/format:webp/1*R3K7IAXQ8ojIgZaP8ZLEGg.jpeg"> 
+
+      <h2>Leia este livro enquanto isso</h2>
+
+      <center>
+    <div class="back"> 
+
+ <p> <iframe src="https://archive.org/embed/marxismunmaskedf00ludwguat" width="350" height="400" frameborder="0" webkitallowfullscreen="true" mozallowfullscreen="true" allowfullscreen 
+style="display: block; margin: 0 auto;"></iframe></p></div></center>
+      
+    </center>
+    <style>
+      .im{
+        width: 350px;
+        height: 200px;
+        border-radius: 20px;
+        background-color: #111;
+  font-size: 2.5rem;
+  text-align: center;
+  animation: brilho 10.7s infinite;
+  box-shadow: 0 0 30px yellow, 0 0 20px yellow;
+    color:black;
+    
+    width: ;
+    background-size: cover;
+  
+    font-size: 20px;
+        border:2px solid red;
+}
+
+@keyframes brilho {
+  0% {
+    box-shadow: 0 0 30px yellow, 0 0 30px yellow;
+  }
+  50% {
+    box-shadow: 0 0 90px blue, 0 0 20px blue;
+  }
+  100% {
+    box-shadow: 0 0 30px yellow, 0 0 30px yellow;
+  }
+      }
+      body {
+  
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+      background-color: #FF3539;
+      }
+      .back{
+        background-color: white;
+        border-radius: 20px;
+        background-color: ;
+  font-size: 2.5rem;
+  text-align: center;
+  ani: brilho 10.7s infinite;
+  box-shadow: 0 0 3px yellow, 0 0 20px yellow;
+    
+    
+    width: ;
+    background-size: cover;
+  
+    font-size: 20px;
+        border:2px solid red;
+}
+      .cab{
+        font-size:25px;
+        color:white;
+        background-color:black;
+        border-radius:10px;
+        border:2px solid red;
+      }
+      h2{
+        color:white;
+        background-color:black;
+        border:2px solid red;
+        border-radius:20px;
+      }
+.cart{
+  color:red;
+}
+      .bott{
+        border-radius:10px;
+    
+        font-size: 20px;
+      }
+
+      
+    </style>
+ <audio id="musica" src="https://ia801501.us.archive.org/8/items/Communism_shall_rule_the_world_forever/Red%20sun%20in%20the%20sky.mp3"></audio>     
+  <script>
+    let tocou = false;
+
+function tocarMusicaAoClicar() {
+  if (!tocou) {
+    const audio = document.getElementById('musica');
+    audio.play().catch((e) => {
+      console.log("Reprodução bloqueada até interação do usuário.");
+    });
+    tocou = true;
+  }
+}
+
+document.addEventListener('click', tocarMusicaAoClicar);
+  </script>    
+           </body>
+</html>
