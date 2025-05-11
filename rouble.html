@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesquisa Rouble</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f8f9fa;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .a { color: blue; }
+    .b { color: red; }
+    .c { color: orange; }
+    .d { color: blue; }
+    .e { color: green; }
+    .f { color: red; }
+
+    .pato-container {
+      width: 100%;
+      max-width: 500px;
+      height: 100px;
+      position: relative;
+      margin-bottom: -0px;
+    }
+
+    .pato {
+      position: absolute;
+      width: 68px;
+      animation: andar 4s linear infinite alternate;
+      
+    }
+
+    @keyframes andar {
+      0% { left: 0; }
+      100% { left: calc(100% - 100px); }
+    }
+
+    #pes {
+      width: 80%;
+      max-width: 500px;
+      padding: 12px 20px;
+      border-radius: 30px;
+      border: 1px solid #ccc;
+      font-size: 18px;
+      box-sizing: border-box;
+      z-index: 0;
+    }
+
+    .bo {
+      margin-top: 20px;
+      padding: 12px 30px;
+      border-radius: 30px;
+      border: none;
+      background-color: #4285f4;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .voltar{
+      border-radius:11px;
+      font-size:25px;
+      
+    }
+
+    .bo:hover {
+      background-color: #357ae8;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="logo">
+    <span class="a">R</span>
+    <span class="b">o</span>
+    <span class="c">u</span>
+    <span class="d">b</span>
+    <span class="e">l</span>
+    <span class="f">e</span>
+  </div>
+
+  <div class="pato-container">
+    <img src="https://raw.githubusercontent.com/KnoxK210/j0go/refs/heads/main/lula.gif"
+         alt="Lula ladrao" class="pato">
+  </div>
+
+  <input id="pes" type="text" placeholder="Pesquisar no Rouble...">
+  <button onclick="butt()" class="bo">Pesquisar</button>
+
+  <script>
+    function butt() {
+      const query = document.getElementById("pes").value;
+      if (query.trim() !== "") {
+        window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
+      }
+    }
+
+    document.getElementById("pes").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") butt();
+    });
+  </script>
+  <br>
+ <button class="voltar"> <a href="index.html">voltar</a></button>
+</body>
+</html>
