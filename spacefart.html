@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="controls">
+            <button id="leftButton">←</button>
+            <button id="shootButton">Disparar</button>
+            <button id="rightButton">→</button>
+        </div>
+        <div id="info">
+            <span id="score">Pontuação: 0</span>
+            <span id="lives">Vidas: 3</span>
+        </div>
+    </div>
+    <audio id="shootSound" src="https://codeberg.org/Konan/Tesknat/raw/branch/main/fart.mp3" preload="auto"></audio>
+    <audio id="explosionSound" src="explosion.mp3" preload="auto"></audio>
+    <style>
+    /* style.css */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+canvas {
+    display: block;
+    background-color: #000;
+    width: 100%;
+    height: auto;
+}
+
+#controls {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10x;
+  
+}
+
+button {
+    padding: 50px;
+    font-size: 18px;
+    border: none;
+    border-radius: 50%;
+    background-color: #fff;
+    color: #000;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ccc;
+}
+
+#info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+    </style>
+    <script>
+    // script.js
+const enemyImg = new Image();
+enemyImg.src = 'https://raw.githubusercontent.com/KnoxK210/Packgame/refs/heads/main/enemy.png'; // Caminho da imagem do inimigo
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Ajusta o tamanho do canvas para o dispositivo
+canvas.width = window.innerWidth > 400 ? 400 : window.innerWidth - 20;
+canvas.height = canvas.width * 1.5;
+
+// Variáveis do jogo
+const playerWidth = 50;
+const playerHeight = 20;
+let playerX = canvas.width / 2 - playerWidth / 2;
+let bullets = [];
+let enemies = [];
+let score = 0;
+let lives = 3;
+let gameOver = false;
+
+// Configurações dos inimigos 
+const enemyRows = 2;
+const enemyCols = 4;
+const enemyWidth = 100;
+const enemyHeight = 100;
+const enemyPadding = 0;
+let enemyDirection = 4; // Direção horizontal dos inimigos
+let enemySpeed = 0.5; // Velocidade inicial dos inimigos
+let enemyDropDistance = 0.1; // Distância de descida dos inimigos
+
+// Sons
+const shootSound = document.getElementById('shootSound');
+const explosionSound = document.getElementById('explosionSound');
+
+// Controles
+document.getElementById('leftButton').addEventListener('touchstart', () => movePlayer(-10));
+document.getElementById('rightButton').addEventListener('touchstart', () => movePlayer(10));
+document.getElementById('shootButton').addEventListener('touchstart', shoot);
+
+// Função para desenhar o jogador
+function drawPlayer() {
+    ctx.fillStyle = 'white';
+    ctx.fillRect(playerX, canvas.height - 50, playerWidth, playerHeight);
+}
+
+// Função para mover o jogador
+function movePlayer(direction) {
+    playerX += direction;
+    if (playerX < 0) playerX = 0;
+    if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
+}
+
+// Função para disparar
+function shoot() {
+    shootSound.currentTime = 0;
+    shootSound.play();
+    bullets.push({ x: playerX + playerWidth / 2 - 2.5, y: canvas.height - 50 });
+}
+
+// Função para desenhar as balas
+function drawBullets() {
+    ctx.fillStyle = 'yellow';
+    bullets.forEach((bullet, index) => {
+        bullet.y -= 20;
+        ctx.fillRect(bullet.x, bullet.y, 5, 10);
+
+        // Remove balas fora da tela
+        if (bullet.y < 0) bullets.splice(index, 1);
+    });
+}
+
+// Função para criar inimigos
+function createEnemies() {
+    for (let row = 0; row < enemyRows; row++) {
+        for (let col = 0; col < enemyCols; col++) {
+            const enemyX = col * (enemyWidth + enemyPadding) + 30;
+            const enemyY = row * (enemyHeight + enemyPadding) + 30;
+            console.log(`Inimigo criado em (${enemyX}, ${enemyY})`);
+            enemies.push({
+                x: enemyX,
+                y: enemyY,
+                width: enemyWidth,
+                height: enemyHeight
+            });
+        }
+    }
+}
+
+// Função para desenhar inimigos
+function drawEnemies() {
+    let changeDirection = false;
+
+    enemies.forEach((enemy, index) => {
+        ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+
+        // Movimento horizontal dos inimigos
+        enemy.x += enemySpeed * enemyDirection;
+
+        // Verifica se algum inimigo atingiu a borda lateral
+        if (enemy.x <= 0 || enemy.x + enemy.width >= canvas.width) {
+            changeDirection = true;
+        }
+
+        // Verifica colisão com o jogador
+        if (
+            playerX < enemy.x + enemy.width &&
+            playerX + playerWidth > enemy.x &&
+            canvas.height - 50 < enemy.y + enemy.height
+        ) {
+            loseLife();
+        }
+
+        // Verifica colisão com balas
+        bullets.forEach((bullet, bulletIndex) => {
+            if (
+                bullet.x < enemy.x + enemy.width &&
+                bullet.x + 5 > enemy.x &&
+                bullet.y < enemy.y + enemy.height &&
+                bullet.y + 10 > enemy.y
+            ) {
+                explosionSound.currentTime = 0;
+                explosionSound.play();
+                enemies.splice(index, 1);
+                bullets.splice(bulletIndex, 1);
+                score += 10;
+                updateScore();
+            }
+        });
+
+        // Verifica se os inimigos chegaram ao fim
+        if (enemy.y + enemy.height >= canvas.height) {
+            console.log(`Game Over: Inimigo ultrapassou o limite inferior (y=${enemy.y})`);
+            gameOver = true;
+        }
+    });
+
+    // Descida dos inimigos
+    if (changeDirection) {
+        enemyDirection *= -1;
+        enemies.forEach(enemy => {
+            enemy.y += enemyDropDistance;
+            console.log(`Inimigo desceu para y=${enemy.y}`);
+        });
+    }
+}
+
+// Função para atualizar a pontuação
+function updateScore() {
+    document.getElementById('score').textContent = `Pontuação: ${score}`;
+}
+
+// Função para perder uma vida
+function loseLife() {
+    lives--;
+    document.getElementById('lives').textContent = `Vidas: ${lives}`;
+    if (lives <= 0) {
+        gameOver = true;
+    }
+}
+
+// Função principal do jogo
+function gameLoop() {
+    if (gameOver) {
+        alert(`Game Over! Pontuação Final: ${score}`);
+        document.location.reload();
+        return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPlayer();
+    drawBullets();
+    drawEnemies();
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Inicialização do jogo
+createEnemies();
+
+gameLoop();
+enemyImg.onload = function () {
+    gameLoop();
+};
+    </script>
+</body>
+</html>
