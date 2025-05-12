@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Livro com Capítulos</title>
+  <style>
+    body {
+      background-color: #1D2033;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .tab-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .tab-buttons button {
+      margin: 5px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    textarea {
+      width: 90%;
+      height: 150px;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .output {
+      white-space: pre-wrap;
+      background-color: #fff;
+      color: black;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 90%;
+      box-shadow: 0 0 10px yellow;
+    }
+    .button-group button {
+      margin: 5px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+    .cab {
+      font-size: 25px;
+      color: white;
+      background-color: black;
+      border-radius: 10px;
+      border: 2px solid red;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gerador de Livro HTML com Capítulos</h1>
+  <div>
+    <input id="bookTitle" placeholder="Título do livro" class="cab"><br><br>
+    <input id="bookImage" placeholder="URL da imagem da capa"><br><br>
+  </div>
+  <div class="tab-buttons" id="tabs"></div>
+  <div id="tabContents"></div>
+  <button onclick="addChapter()">+ Adicionar Capítulo</button>
+  <button onclick="generateIndexPage()">Gerar Página Inicial com Índice</button>
+
+  <script>
+    let chapterCount = 0;
+    const chapters = [];
+
+    function addChapter() {
+      const id = `chapter${chapterCount}`;
+      const tabBtn = document.createElement("button");
+      tabBtn.innerText = `Capítulo ${chapterCount + 1}`;
+      tabBtn.onclick = () => showChapter(id);
+
+      const contentDiv = document.createElement("div");
+      contentDiv.className = "tab-content";
+      contentDiv.id = id;
+      contentDiv.innerHTML = `
+        <input placeholder="Nome do capítulo" id="${id}_name"><br><br>
+        <textarea id="${id}_editor"></textarea><br>
+        <div class="button-group">
+          <button onclick="insertTag('${id}', '<p>', '</p>')">&lt;p&gt;</button>
+          <button onclick="insertTag('${id}', '<strong>', '</strong>')">&lt;strong&gt;</button>
+          <button onclick="insertTag('${id}', '<font color=\'red\'>', '</font>')">&lt;color&gt;</button>
+          <button onclick="insertTag('${id}', '<h1>', '</h1>')">&lt;h1&gt;</button>
+          <button onclick="insertTag('${id}', '<h2>', '</h2>')">&lt;h2&gt;</button>
+          <button onclick="insertTag('${id}', '<center>', '</center>')">&lt;center&gt;</button>
+          <button onclick="insertTag('${id}', '<br>', '')">&lt;br&gt;</button>
+          <button onclick="clearEditor('${id}')">Apagar</button>
+          <button onclick="generateHTML('${id}')">Gerar HTML</button>
+          <button onclick="copyToClipboard('${id}')">Copiar</button>
+          <button onclick="downloadHTML('${id}')">Baixar</button>
+        </div>
+        <div class="output" id="${id}_output" contenteditable="true"></div>
+      `;
+      
+      document.getElementById("tabs").appendChild(tabBtn);
+      document.getElementById("tabContents").appendChild(contentDiv);
+      showChapter(id);
+      chapters.push(id);
+      chapterCount++;
+    }
+
+    function showChapter(id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function insertTag(id, openTag, closeTag) {
+      const editor = document.getElementById(`${id}_editor`);
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const text = editor.value;
+      const selected = text.substring(start, end);
+      const newText = text.substring(0, start) + openTag + selected + closeTag + text.substring(end);
+      editor.value = newText;
+      editor.focus();
+    }
+
+    function clearEditor(id) {
+      document.getElementById(`${id}_editor`).value = "";
+      document.getElementById(`${id}_output`).innerText = "";
+    }
+
+    function generateHTML(id) {
+  formatarTexto(id); // Aplica a formatação antes de gerar o HTML
+
+  const title = document.getElementById("bookTitle").value;
+  const img = document.getElementById("bookImage").value;
+  const chapter = document.getElementById(`${id}_name`).value;
+  const content = document.getElementById(`${id}_editor`).value;
+
+  const fullHTML = `<!doctype html>
+  <html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <style>
+  @keyframes brilho {
+    0% { box-shadow: 0 0 30px yellow, 0 0 30px yellow; }
+    50% { box-shadow: 0 0 90px blue, 0 0 20px blue; }
+    100% { box-shadow: 0 0 30px yellow, 0 0 30px yellow; }
+  }
+  .im {
+    width: 350px;
+    height: 200px;
+    border-radius: 20px;
+    background-color: #111;
+    animation: brilho 10.7s infinite;
+    box-shadow: 0 0 30px yellow, 0 0 20px yellow;
+    border: 2px solid red;
+  }
+  .cab {
+    font-size: 25px;
+    color: white;
+    background-color: black;
+    border-radius: 10px;
+    border: 2px solid red;
+  }
+  h2 {
+    color: white;
+    background-color: black;
+    border: 2px solid red;
+    border-radius: 20px;
+  }
+  .back {
+    background-color: white;
+    border-radius: 20px;
+    animation: brilho 10.7s infinite;
+    box-shadow: 0 0 30px yellow, 0 0 20px yellow;
+    padding: 20px;
+  }
+  body {
+    background-color: #1D2033;
+  }</style>
+  </head><body>
+  <button class='bott'><a href='index.html'>Voltar</a></button>
+  <center>
+  <h1 class='cab'>${title}</h1>
+  <img class='im' src='${img}'>
+  <h2>${chapter}</h2>
+  <div class='back'>${content}</div>
+  </center>
+  </body></html>`;
+
+  document.getElementById(`${id}_output`).innerText = fullHTML;
+}
+    
+
+    function copyToClipboard(id) {
+      const text = document.getElementById(`${id}_output`).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Copiado com sucesso!");
+      });
+    }
+
+    function downloadHTML(id) {
+      const text = document.getElementById(`${id}_output`).innerText;
+      const blob = new Blob([text], { type: 'text/html' });
+      const link = document.createElement('a');
+      const name = document.getElementById(`${id}_name`).value || 'pagina';
+      link.href = URL.createObjectURL(blob);
+      link.download = name.replace(/\s+/g, '_') + '.html';
+      link.click();
+    }
+
+    function generateIndexPage() {
+      const title = document.getElementById("bookTitle").value;
+      let list = "";
+
+      for (let id of chapters) {
+        const capName = document.getElementById(`${id}_name`).value || id;
+        const filename = capName.replace(/\s+/g, '_') + '.html';
+        list += `<li><a href='${filename}'>${capName}</a></li>\n`;
+      }
+
+      const html = `<html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>
+      <style>
+      body {
+        background-color: #1D2033;
+        color: white;
+        font-family: Arial;
+        padding: 30px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li a {
+        color: yellow;
+        text-decoration: none;
+        font-size: 20px;
+      }
+      </style></head><body>
+      <h1>${title}</h1>
+      <ul>${list}</ul>
+      </body></html>`;
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'index.html';
+      link.click();
+    }
+
+    // Função para formatar o texto automaticamente com base no conteúdo.
+    function formatarTexto(id) {
+  const editor = document.getElementById(`${id}_editor`);
+  let content = editor.value;
+
+  // Dividir o conteúdo em linhas para detectar quebras de parágrafo
+  const lines = content.split('\n');
+
+  // Variável para armazenar o conteúdo formatado
+  let formattedContent = '';
+  let isParagraph = false;
+
+  lines.forEach(line => {
+    // Se a linha está vazia, fechamos o parágrafo atual
+    if (line.trim() === '') {
+      if (isParagraph) {
+        formattedContent += '</p>';
+        isParagraph = false;
+      }
+    } else {
+      // Se a linha não estiver vazia e não houver um parágrafo aberto, iniciamos um novo <p>
+      if (!isParagraph) {
+        formattedContent += '<p>';
+        isParagraph = true;
+      }
+      // Adicionamos a linha ao conteúdo
+      formattedContent += line + '\n';
+    }
+  });
+
+  // Se o último parágrafo não foi fechado, fechamos ele aqui
+  if (isParagraph) {
+    formattedContent += '</p>';
+  }
+
+  // Atualizar o conteúdo do editor com o texto formatado
+  editor.value = formattedContent;
+}
+  </script>
+</body>
+</html>
