@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Profissional</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: linear-gradient(to right, blue, #808080);
+      margin: 0;
+    }
+    h1 { text-align: center; }
+    h3 { color: red; text-align: center; }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tabs button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 20px;
+    }
+
+    section {
+      display: none;
+      padding: 20px;
+      border-radius: 20px;
+      background-color: black;
+      color: white;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    .caixa {
+      margin-top: 10px;
+    }
+
+    input, textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 5px;
+      font-size: 16px;
+      border-radius: 15px;
+      
+    }
+
+    .resolver {
+      background-color: #00098B;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      
+    }
+
+    .resultado {
+      margin-top: 15px;
+      font-weight: bold;
+      
+      
+    
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .tabs { flex-direction: column; align-items: center; }
+      .tabs button { width: 100%; margin-bottom: 10px; }
+      section { padding: 15px; }
+      input, textarea { font-size: 14px; }
+      .resolver { padding: 8px 16px; }
+    }
+
+    @media (max-width: 400px) {
+      h1 { font-size: 1.5em; }
+      .tabs button { font-size: 14px; }
+      input, textarea { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Calculadora</h1>
+  <div class="tabs">
+    <button onclick="trocarAba('linear')">Sistema Linear</button>
+    <button onclick="trocarAba('basica')">Operações Básicas</button>
+    <button onclick="trocarAba('estatistica')">Estatística</button>
+    <button onclick="trocarAba('trigonometria')">Trigonometria</button>
+    <button onclick="trocarAba('funcoes')">Funções</button>
+  </div>
+
+  <section id="linear" class="active">
+    <h3>Resolução de Sistemas Lineares</h3>
+    <div class="caixa">
+      <textarea id="entrada" rows="4" placeholder="Digite as equações, uma por linha."
+></textarea>
+      <center><button class="resolver" onclick="resolverSistema()">Resolver</button></center>
+      <div class="resultado" id="resultadoLinear"></div>
+    </div>
+  </section>
+
+  <section id="basica">
+    <h3>Operações Básicas</h3>
+    <div class="caixa">
+      <input type="text" id="expressao" placeholder="Ex: 20 + 30 * (40 - 20)">
+      <button class="resolver" onclick="calcularExpressao()">Calcular</button>
+      <div class="resultado" id="resultadoExpressao"></div>
+    </div>
+  </section>
+
+  <section id="estatistica">
+    <h3>Estatística</h3>
+    <div class="caixa">
+      <input type="text" id="numeros" placeholder="Digite os números separados por vírgula">
+      <button class="resolver" onclick="calcularEstatisticas()">Calcular Estatísticas</button>
+      <div class="resultado" id="resultadoEstatisticas"></div>
+    </div>
+  </section>
+
+  <section id="trigonometria">
+    <h3>Trigonometria</h3>
+    <div class="caixa">
+      <input type="number" id="angulo" placeholder="Digite o ângulo (em graus)">
+      <button class="resolver" onclick="calcularTrigonometria()">Calcular Funções Trigonométricas</button>
+      <div class="resultado" id="resultadoTrigonometria"></div>
+    </div>
+  </section>
+
+  <section id="funcoes">
+    <h3>Cálculos com Funções</h3>
+    <div class="caixa">
+      <input type="text" id="funcaoInput" placeholder="Digite a função f(x) (Ex: 2*x + 3)">
+      <input type="number" id="xValor" placeholder="Digite o valor de x">
+      <button class="resolver" onclick="calcularFuncao()">Calcular f(x)</button>
+      <div class="resultado" id="resultadoFuncao"></div>
+    </div>
+    <div class="caixa">
+      <input type="text" id="funcaoCompostaInput" placeholder="Digite a função composta (Ex: x*x + 1)">
+      <input type="number" id="valorComposto" placeholder="Digite o valor de x">
+      <button class="resolver" onclick="calcularComposicao()">Calcular Composição de Funções</button>
+      <div class="resultado" id="resultadoComposicao"></div>
+    </div>
+  </section>
+
+  <script>
+    function trocarAba(aba) {
+      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+      document.getElementById(aba).classList.add("active");
+    }
+
+    function resolverSistema() {
+      const texto = document.getElementById("entrada").value.trim();
+      const linhas = texto.split("\n").map(l => l.trim());
+      const equacoes = [];
+
+      try {
+        for (let linha of linhas) {
+          const partes = linha.split("=");
+          if (partes.length !== 2) throw "Equação mal formatada.";
+          const esquerda = partes[0].replace(/\s/g, '');
+          const direita = parseFloat(partes[1]);
+          const match = esquerda.match(/([+-]?\d*\.?\d*)([xyz])/g);
+          let a = 0, b = 0, c = 0;
+
+          if (!match) throw "Erro ao analisar a equação.";
+
+          match.forEach(t => {
+            const coef = parseFloat(t) || (t[0] === '-' ? -1 : 1);
+            if (t.includes("x")) a = coef;
+            else if (t.includes("y")) b = coef;
+            else if (t.includes("z")) c = coef;
+          });
+
+          equacoes.push([a, b, c, direita]);
+        }
+
+        if (equacoes.length < 2 || equacoes.length > 3)
+          throw "Insira 2 ou 3 equações com até 3 variáveis (x, y, z).";
+
+        const matriz = equacoes.map(e => e.slice(0, -1));
+        const termos = equacoes.map(e => e[3]);
+
+        const resultado = resolverSistemaLinear(matriz, termos);
+        document.getElementById("resultadoLinear").innerText = resultado;
+      } catch (e) {
+        document.getElementById("resultadoLinear").innerText = "Erro: " + e;
+      }
+    }
+
+    function resolverSistemaLinear(matriz, termos) {
+      const n = matriz.length;
+      for (let i = 0; i < n; i++) {
+        let max = Math.abs(matriz[i][i]);
+        let maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+          if (Math.abs(matriz[k][i]) > max) {
+            max = Math.abs(matriz[k][i]);
+            maxRow = k;
+          }
+        }
+        [matriz[i], matriz[maxRow]] = [matriz[maxRow], matriz[i]];
+        [termos[i], termos[maxRow]] = [termos[maxRow], termos[i]];
+
+        for (let k = i + 1; k < n; k++) {
+          const f = matriz[k][i] / matriz[i][i];
+          for (let j = i; j < n; j++) matriz[k][j] -= f * matriz[i][j];
+          termos[k] -= f * termos[i];
+        }
+      }
+
+      const x = Array(n).fill(0);
+      for (let i = n - 1; i >= 0; i--) {
+        x[i] = termos[i];
+        for (let j = i + 1; j < n; j++) x[i] -= matriz[i][j] * x[j];
+        x[i] /= matriz[i][i];
+      }
+
+      return ['x', 'y', 'z'].slice(0, n).map((v, i) => `${v} = ${x[i].toFixed(4)}`).join("\n");
+    }
+
+    function calcularExpressao() {
+      const expressao = document.getElementById("expressao").value;
+      try {
+        const resultado = eval(expressao);
+        document.getElementById("resultadoExpressao").innerText = `Resultado: ${resultado}`;
+      } catch {
+        document.getElementById("resultadoExpressao").innerText = "Expressão inválida.";
+      }
+    }
+
+    function calcularEstatisticas() {
+      const entrada = document.getElementById("numeros").value;
+      const numeros = entrada.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+
+      if (numeros.length === 0) {
+        document.getElementById("resultadoEstatisticas").innerText = "Insira números válidos.";
+        return;
+      }
+
+      const soma = numeros.reduce((a, b) => a + b, 0);
+      const media = soma / numeros.length;
+      const ordenados = [...numeros].sort((a, b) => a - b);
+      const mediana = ordenados[Math.floor(ordenados.length / 2)];
+      const max = Math.max(...numeros);
+      const min = Math.min(...numeros);
+
+      const resultado = `
+        <p>Média: ${media.toFixed(2)}</p>
+        <p>Mediana: ${mediana}</p>
+        <p>Máximo: ${max}</p>
+        <p>Mínimo: ${min}</p>
+      `;
+      document.getElementById("resultadoEstatisticas").innerHTML = resultado;
+    }
+
+    function calcularTrigonometria() {
+      const angulo = parseFloat(document.getElementById("angulo").value);
+      if (isNaN(angulo)) {
+        document.getElementById("resultadoTrigonometria").innerText = "Por favor, insira um valor válido para o ângulo.";
+        return;
+      }
+
+      const rad = angulo * Math.PI / 180;
+      const seno = Math.sin(rad).toFixed(4);
+      const cosseno = Math.cos(rad).toFixed(4);
+      const tangente = Math.tan(rad).toFixed(4);
+
+      document.getElementById("resultadoTrigonometria").innerHTML = `
+        <p>Seno(${angulo}°) = ${seno}</p>
+        <p>Cosseno(${angulo}°) = ${cosseno}</p>
+        <p>Tangente(${angulo}°) = ${tangente}</p>
+      `;
+    }
+
+    function calcularFuncao() {
+      const funcaoInput = document.getElementById("funcaoInput").value;
+      const xValor = parseFloat(document.getElementById("xValor").value);
+
+      if (isNaN(xValor)) {
+        document.getElementById("resultadoFuncao").innerText = "Por favor, insira um valor válido para x.";
+        return;
+      }
+
+      try {
+        const f = new Function("x", "return " + funcaoInput);
+        const resultado = f(xValor);
+        document.getElementById("resultadoFuncao").innerText = `f(${xValor}) = ${resultado}`;
+      } catch {
+        document.getElementById("resultadoFuncao").innerText = "Erro ao calcular a função.";
+      }
+    }
+
+    function calcularComposicao() {
+      const funcaoCompostaInput = document.getElementById("funcaoCompostaInput").value;
+      const xValor = parseFloat(document.getElementById("valorComposto").value);
+
+      if (isNaN(xValor)) {
+        document.getElementById("resultadoComposicao").innerText = "Por favor, insira um valor válido para x.";
+        return;
+      }
+
+      try {
+        const g = new Function("x", "return " + funcaoCompostaInput);
+        const resultado = g(xValor);
+        document.getElementById("resultadoComposicao").innerText = `g(${xValor}) = ${resultado}`;
+      } catch {
+        document.getElementById("resultadoComposicao").innerText = "Erro ao calcular a função composta.";
+      }
+    }
+  </script>
+</body>
+</html>
