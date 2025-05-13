@@ -4,249 +4,213 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Temple Dev</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/script.js" defer></script>
-</head>
-<body>
-  
-  
-  <div class="menu-toggle" id="menu-toggle">&#9776;</div> <!---icone da aba--->
-
-  <aside class="sidebar" id="sidebar"> <!--fundo dos nomes na aba fechado--->
-    <h1>Aba de Navegação</h1>
-    <nav> <!---os nomes--->
-    <details>
-      <summary class="sum1">Livros</summary>
-     <a href="poemasc.html">Poemas São João da Cruz</a><br>
-      <a href="boehme.html">Frases e Tratados de Jacob Boehme</a><br>
-      <a href="sumateologica1.html"> Suma teológica - tratados dialéticos</a><br>
-      <a href="ev.html">Eric Voegelin - Ordem e história</a><br>
-      <a href="poemas.html">Poemas - Fernando Pessoa</a> 
-       <br><a href="livro2.html">SEPHER YETZIRAH</a> 
-    </details><br> <details>
-      <summary class="sum2">Páginas</summary>
-      <a href="piano.html">Musica</a><br>
-      <a href="calculadora.html">Calculadora</a><br>
-      <a href="rouble.html">Rouble</a><br><a href="draw.html">Art Draw</a>
-    </details><br><details> <summary class="sum3">Assuntos Aleatórios</summary>
-      <a href="aleatorio.html">Assuntos Aleatórios</a>
-    </details><br>
-      <details> <summary class="sum4">Jogos</summary>
-      <a href="lularunner.html">Lula Runner</a><br>
-<a href="spacefart.html">Space Fart</a><br>
- <a href="tetris.html">tetris</a><br>       
-<a href="flapinga.html">Flapinga</a>
-      </details>
-    </nav>
-  </aside>
-
-  <main class="main-content">
-  <header class="hero-header">
-      <img src="https://i.pinimg.com/originals/d4/95/46/d49546b1b2e76cf604c009a84b47d259.gif">
-  
-    
-  
-    <h1 class="glow-text">Templo de Desenvolvimento</h1>
-      
-  </header>
-    <div class="pref"><center><p class="prefacio"> Lugar onde eu adiciono algumas ideias minhas em <span class="dev">Desenvolvimento Web <span class="dev2"> front-end</span></span> e publico assuntos do meu interesse - Religião comparada, politica, ideologia, etc.</p></center>
-    </div>
-</main>
-
-  
   <style>
-      body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-
-  color: #f0f0f0;
-  transition: margin-left 0.3s ease;
-  background-color:#000FFF;
-}
-        .pref{
-        margin:0;
-    border: 2px solid red;
-    border-radius:20px;
-        padding:0;
-        position:absolute;
-        background-color:black;
-   }
-  .dev{
-    
-    font-weight:bold;
-   }
-    .dev2{
-      color:yellow;
-      font-wight: bold;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #f0f0f0;
+      transition: margin-left 0.3s ease;
+      background-color: #000FFF;
     }
 
-.menu-toggle {
+    .menu-toggle {
+      position: fixed;
+      top: 15px;
+      left: 30px;
+      font-size: 26px;
+      color: yellow;
+      background-color: red;
+      padding: 10px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background-color: black;
+      padding: 2rem 1rem;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.4);
+      transition: left 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto; /* habilita rolagem vertical */
+    }
+
+    .sidebar.active {
+      left: 0;
+      border-radius: 20px;
+    }
+
+    .sidebar h1 {
+      color: black;
+      font-size: 1.4rem;
+      margin-bottom: 2rem;
+      background-color: grey;
+      border-radius: 20px;
+      border: 2px solid red;
+      padding: 10px;
+    }
+
+    .sidebar nav a {
+      display: block;
+      color: red;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .sidebar nav a:hover {
+      color: #00ffc8;
+    }
+
+    .main-content {
+      padding: 2rem;
+      margin-left: 0;
+      transition: margin-left 0.3s ease;
+      background-color: black;
+    }
+
+    .sidebar.active ~ .main-content {
+      margin-left: 250px;
+      background-color: blue;
+    }
+
+    summary {
+      cursor: pointer;
+    }
+
+    .sum1, .sum2, .sum3, .sum4 {
+      border-radius: 10px;
+      border: 2px solid purple;
+      background-color: red;
+      font-size: 23px;
+      color: blue;
+      margin-top: 10px;
+      padding: 5px;
+    }
+
+    .hero-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 80vh;
+      text-align: center;
+      background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
+      padding: 5rem;
+      border-radius: 40px 40px 0 0;
+      border: 2px solid purple;
+      padding-left: 15rem;
+      padding-right: 6rem;
+    }
+
+    .glow-text {
+      position: absolute;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #fff;
+      animation: float 3s ease-in-out infinite;
+      margin-top: -522px;
+      margin-right: 150px;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .pref {
+      margin: 0;
+      border: 2px solid red;
+      border-radius: 20px;
+      padding: 0;
+      position: absolute;
+      background-color: black;
+    }
+
+    .prefacio {
+      padding: 20px;
+    }
+
+    .dev {
+      font-weight: bold;
+    }
+
+    .dev2 {
+      color: yellow;
+      font-weight: bold;
+    }
+  .top-image {
   position: fixed;
-  top: 15px;
-  left: 30px;
-  font-size: 26px;
-  color: yellow;
-  background-color: red;
-  padding: 10px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  z-index: 1001;
- 
-   
- 
-  
-}
-  img{
-  width: 100px;
-  height:200px;
-  margin-bottom: 350px;
-  margin-right: 420px;
-   }
-
-.sidebar {
-  position: fixed;
-  left: -250px;
-  top: 0;
-  width: 250px;
-  height: 100vh;
-  background-color: black;
-  padding: 2rem 1rem;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.4);
-  transition: left 0.3s ease;
-  z-index: 1000;
-}
-
-.sidebar.active {
-  left: 0;
-  border-radius:20px;
-  <!---config aba aberta--->
-  
-}
-
-.sidebar h1 {
-  color: black;
-  font-size: 1.4rem;
-  margin-bottom: 2rem;
-  margin-top: 2rem;
-  margin-left: 2rem;
-  background-color:grey;
-  border-radius:20px;
-  border: 2px solid red;
-  <!---config da "palavras & mundos" na aba--->
-}
-
-.sidebar nav a {
-  display: block;
-  color: red;
-  text-decoration: none;
-  margin: 1rem 0;
-  transition: color 0.3s;
-  <!---fundo das palavras na aba--->
-  
-}
-
-.sidebar nav a:hover {
-  color: #00ffc8;
-  
-}
-
-.main-content {
-  padding: 2rem;
-  margin-left: 0;
-  transition: margin-left 0.3s ease;
-  background-color: black;
-  <!--fundo da body "projetos de desenvolvimento "--->
-}
-
-.sidebar.active ~ .main-content {
-  margin-left: 250px;
-  background-color: blue;
-  <!---fundo da body "projetos de desenvolvimento " e fundo da aba qnd aberta--->
-}
-  .sum1{
-    border-radius:10px;
-    border:2px solid purple;
-    background-color:red;
-    font-size:23px;
-    color:blue;
-  }
-  .sum4{
-    border-radius:10px;
-    border:2px solid purple;
-    background-color:red;
-    font-size:23px;
-    color:blue;
-  }
-  .sum2{
-    border-radius:10px;
-    border:2px solid purple;
-    background-color:red;
-    font-size:23px;
-    color:blue;
-  }
-  .sum3{
-    border-radius:10px;
-    border:2px solid purple;
-    background-color:red;
-    font-size:23px;
-    color:blue;
-  }
-
-section {
-  margin-bottom: 4rem;
-  
-  
-}
-
-section h2 {
-  color: #00ffc8;
-  border-bottom: 2px solid purple;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-  background-color: green;
-}
-.hero-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 80vh;
-  text-align: center;
-  background: radial-gradient(circle at center, #1e1e1e 0%, #121212 100%);
-  padding: 5rem;
-  border-radius:40px 40px 0 0;
-  border: 2px solid purple;
-  padding-left: 15rem;
-  padding-right: 6rem;
-  
-  <!--- background da body "projetos de desenvolvimento "--->
-}
-
-.glow-text {
-  position: absolute;
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #fff;
-  animation: float 3s ease-in-out infinite;
- margin-top: -522px;
-  margin-right:150px;
-  
-
- <!---config da palavra "projetos de desenvolvimento "--->
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  top: 65px; /* logo abaixo do botão */
+  left: 20px;
+  width: 80px;
+  height: 180px;
+  z-index: 999;
+  border-radius: 10px;
 }
   </style>
+</head>
+<body>
+
+  <div class="menu-toggle" id="menu-toggle">&#9776;</div>
+<img src="https://i.pinimg.com/originals/d4/95/46/d49546b1b2e76cf604c009a84b47d259.gif" class="top-image" />
+  <aside class="sidebar" id="sidebar">
+    <h1>Aba de Navegação</h1>
+    <nav>
+      <details>
+        <summary class="sum1">Livros</summary>
+        <a href="poemasc.html">Poemas São João da Cruz</a><br>
+        <a href="boehme.html">Frases e Tratados de Jacob Boehme</a><br>
+        <a href="sumateologica1.html">Suma teológica</a><br>
+        <a href="ev.html">Eric Voegelin</a><br>
+        <a href="poemas.html">Poemas - Fernando Pessoa</a><br>
+        <a href="livro2.html">SEPHER YETZIRAH</a>
+      </details>
+      <details>
+        <summary class="sum2">Páginas</summary>
+        <a href="piano.html">Musica</a><br>
+        <a href="calculadora.html">Calculadora</a><br>
+        <a href="rouble.html">Rouble</a><br>
+        <a href="draw.html">Art Draw</a>
+      </details>
+      <details>
+        <summary class="sum3">Assuntos Aleatórios</summary>
+        <a href="aleatorio.html">Assuntos Aleatórios</a>
+      </details>
+      <details>
+        <summary class="sum4">Jogos</summary>
+        <a href="lularunner.html">Lula Runner</a><br>
+        <a href="spacefart.html">Space Fart</a><br>
+        <a href="tetris.html">Tetris</a><br>
+        <a href="flapinga.html">Flapinga</a><br>
+        
+   </details>
+
+ </nav>
+      
+  </aside>
+    
+
+  <main class="main-content">
+    <header class="hero-header">
+      
+      <h1 class="glow-text">Templo de Desenvolvimento</h1>
+    </header>
+    <div class="pref">
+      <center>
+        <p class="prefacio">Lugar onde eu adiciono algumas ideias minhas em <span class="dev">Desenvolvimento Web <span class="dev2">front-end</span></span> e publico assuntos do meu interesse - Religião comparada, política, ideologia, etc.</p>
+      </center>
+    </div>
+  </main>
+
   <script>
-      document.getElementById('menu-toggle').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('active');
-});
+    document.getElementById('menu-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('active');
+    });
   </script>
+
 </body>
-  </html>
+          </html>
