@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Piano Virtual</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: black;
+      color: white;
+    }
+    .piano {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      position: relative;
+    }
+    .key-container {
+      position: relative;
+    }
+    .key {
+      width: 60px;
+      height: 220px;
+      background: white;
+      border: 1px solid #000;
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00f8ff, 0 0 20px #00f8ff, 0 0 30px #00f8ff;
+      animation: glow-white 2s infinite alternate;
+    }
+    .black-key {
+      width: 40px;
+      height: 130px;
+      background: black;
+      position: absolute;
+      top: 0;
+      left: 45px;
+      z-index: 2;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+      animation: glow-black 2s infinite alternate;
+    }
+
+    @keyframes glow-white {
+      0% { box-shadow: 0 0 10px #00f8ff, 0 0 20px #00f8ff; }
+      100% { box-shadow: 0 0 20px #00f8ff, 0 0 40px #00f8ff; }
+    }
+
+    @keyframes glow-black {
+      0% { box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff; }
+      100% { box-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff; }
+    }
+
+    .image-container {
+      margin-top: 20px;
+    }
+    .image-container img {
+      width: 80%;
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+  .black-key {
+      width: 40px;
+      height: 130px;
+      background: black;
+      position: absolute;
+      top: 0;
+      left: 45px;
+      z-index: 2;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 30px #00ff88;
+      animation: glow-black 2s infinite alternate;
+    }
+
+    @keyframes glow-black {
+      0% { box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88; }
+      100% { box-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1> Piano</h1>
+
+  <div class="piano">
+    <div class="key-container">
+      <div class="key" data-note="C"></div>
+      <div class="black-key" data-note="C#"></div>
+    </div>
+    <div class="key-container">
+      <div class="key" data-note="D"></div>
+      <div class="black-key" data-note="D#"></div>
+    </div>
+    <div class="key-container"><div class="key" data-note="E"></div></div>
+    <div class="key-container">
+      <div class="key" data-note="F"></div>
+      <div class="black-key" data-note="F#"></div>
+    </div>
+    <div class="key-container">
+      <div class="key" data-note="G"></div>
+      <div class="black-key" data-note="G#"></div>
+    </div>
+    <div class="key-container">
+      <div class="key" data-note="A"></div>
+      <div class="black-key" data-note="A#"></div>
+    </div>
+    <div class="key-container"><div class="key" data-note="B"></div></div>
+  </div>
+
+  <div class="image-container">
+    <img src="https://images.steamusercontent.com/ugc/2061010405464342137/514E57451516170F8650F01A86515C064000913A/?imw=512&&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false" alt="Piano GIF">
+  </div>
+
+  <script>
+    const notes = {
+      'C': 'sounds/C.mp3',
+      'C#': 'sounds/Cs.mp3',
+      'D': 'sounds/D.mp3',
+      'D#': 'sounds/Ds.mp3',
+      'E': 'sounds/E.mp3',
+      'F': 'sounds/F.mp3',
+      'F#': 'sounds/Fs.mp3',
+      'G': 'sounds/G.mp3',
+      'G#': 'sounds/Gs.mp3',
+      'A': 'sounds/A.mp3',
+      'A#': 'sounds/As.mp3',
+      'B': 'sounds/B.mp3'
+    };
+
+    const audioElements = {};
+    for (let note in notes) {
+      const audio = new Audio(notes[note]);
+      audio.load();
+      audioElements[note] = audio;
+    }
+
+    document.querySelectorAll('.key, .black-key').forEach(key => {
+      key.addEventListener('click', () => {
+        const note = key.getAttribute('data-note');
+        const originalAudio = audioElements[note];
+        if (originalAudio) {
+          const clone = originalAudio.cloneNode();
+          clone.play().catch(err => console.error("Erro ao tocar:", err));
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
