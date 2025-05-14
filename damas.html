@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Jogo de Damas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+    <div class="controls">
+        <label class="difficulty-label" for="difficulty"><span>Dificuldade:</span></label>
+        <select id="difficulty">
+            <option value="easy">Fácil</option>
+            <option value="medium" selected>Médio</option>
+            <option value="hard">Difícil</option>
+        </select>
+    </div>
+    <div id="message"></div>
+    <div class="board" id="board"></div>
+  <style>
+  
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    background-size: 400% 400%;
+    animation: backgroundShift 15s ease infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+@keyframes backgroundShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.controls {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#difficulty {
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#message {
+    font-size: 20px;
+    font-weight: bold;
+    color: #f0f0f0;
+    margin: 15px;
+    text-align: center;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(40px, 1fr));
+    grid-template-rows: repeat(8, minmax(40px, 1fr));
+    aspect-ratio: 1 / 1;
+    max-width: 90vw;
+    max-height: 90vw;
+    border: 3px solid #4b0082;
+    background-color: #444;
+    animation: glow 2.5s infinite ease-in-out;
+}
+
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 8px 2px #8a2be2, 0 0 16px 4px #8b008b, 0 0 24px 6px #b8860b;
+    }
+    50% {
+        box-shadow: 0 0 12px 3px #00008b, 0 0 20px 6px #4b0082, 0 0 28px 8px #daa520;
+    }
+    100% {
+        box-shadow: 0 0 8px 2px #8a2be2, 0 0 16px 4px #8b008b, 0 0 24px 6px #b8860b;
+    }
+}
+
+.square {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.light {
+    background-color: #eee;
+}
+
+.dark {
+    background-color: #222;
+}
+
+.piece {
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    position: absolute;
+    top: 15%;
+    left: 15%;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+}
+
+.piece:hover {
+    transform: scale(1.1);
+}
+
+.red {
+    background-color: #e74c3c;
+    border: 2px solid #c0392b;
+}
+
+.black {
+    background-color: #2c3e50;
+    border: 2px solid #1a252f;
+}
+
+.king::after {
+    content: '•⁠‿⁠•';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: gold;
+    font-size: 16px;
+    text-shadow: 0 1px 2px black;
+}
+
+.selected {
+    outline: 3px solid yellow;
+    outline-offset: -3px;
+}
+
+.possible-move::before {
+    content: '';
+    position: absolute;
+    width: 20%;
+    height: 20%;
+    background-color: rgba(0, 255, 0, 0.6);
+    border-radius: 50%;
+    top: 40%;
+    left: 40%;
+    z-index: 1;
+}
+.difficulty-label {
+    color: #fff8dc; /* dourado claro */
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+    animation: glowText 3s ease-in-out infinite, float 5s ease-in-out infinite;
+    text-shadow: 0 0 5px #f8f8ff, 0 0 10px #ffd700;
+}
+
+@keyframes glowText {
+    0%, 100% {
+        text-shadow: 0 0 5px #fff, 0 0 10px #ffd700, 0 0 15px #8a2be2;
+    }
+    50% {
+        text-shadow: 0 0 10px #ffeaa7, 0 0 20px #daa520, 0 0 30px #4b0082;
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+.game-title {
+    margin-top: 20px;
+    font-size: 32px;
+    font-weight: bold;
+    color: #f8f8ff;
+    text-shadow: 0 0 5px #fff, 0 0 10px #8a2be2, 0 0 15px #ffd700;
+    animation: glowTitle 4s ease-in-out infinite, floatTitle 6s ease-in-out infinite;
+}
+
+@keyframes glowTitle {
+    0%, 100% {
+        text-shadow: 0 0 5px #fff, 0 0 10px #8a2be2, 0 0 15px #ffd700;
+    }
+    50% {
+        text-shadow: 0 0 10px #ffd700, 0 0 20px #4b0082, 0 0 30px #ffcc00;
+    }
+}
+
+@keyframes floatTitle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+  </style>
+
+  <script>
+  const board = document.getElementById('board');
+const message = document.getElementById('message');
+const difficultySelect = document.getElementById('difficulty');
+
+let selectedPiece = null;
+let currentPlayer = 'red';
+let gameActive = true;
+let currentDifficulty = 'medium';
+
+// Estado do jogo
+const gameState = {
+    board: [
+        [null, 'b', null, 'b', null, 'b', null, 'b'],
+        ['b', null, 'b', null, 'b', null, 'b', null],
+        [null, 'b', null, 'b', null, 'b', null, 'b'],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        ['r', null, 'r', null, 'r', null, 'r', null],
+        [null, 'r', null, 'r', null, 'r', null, 'r'],
+        ['r', null, 'r', null, 'r', null, 'r', null]
+    ],
+    redPieces: 12,
+    blackPieces: 12
+};
+
+difficultySelect.addEventListener('change', () => {
+    currentDifficulty = difficultySelect.value;
+    resetGame();
+});
+
+function createBoard() {
+    board.innerHTML = '';
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.classList.add('square');
+            square.dataset.row = row;
+            square.dataset.col = col;
+
+            if ((row + col) % 2 === 0) {
+                square.classList.add('light');
+            } else {
+                square.classList.add('dark');
+            }
+
+            const pieceColor = gameState.board[row][col];
+            if (pieceColor) {
+                const piece = document.createElement('div');
+                piece.classList.add('piece');
+
+                if (pieceColor === 'r' || pieceColor === 'R') {
+                    piece.classList.add('red');
+                } else {
+                    piece.classList.add('black');
+                }
+
+                if (pieceColor === 'R' || pieceColor === 'B') {
+                    piece.classList.add('king');
+                }
+
+                piece.dataset.row = row;
+                piece.dataset.col = col;
+                piece.addEventListener('click', selectPiece);
+                square.appendChild(piece);
+            }
+
+            square.addEventListener('click', movePiece);
+            board.appendChild(square);
+        }
+    }
+}
+
+function selectPiece(e) {
+    e.stopPropagation();
+    if (!gameActive || currentPlayer !== 'red') return;
+
+    const piece = e.currentTarget;
+    const pieceColor = gameState.board[piece.dataset.row][piece.dataset.col];
+
+    if (pieceColor && pieceColor.toLowerCase() !== 'r') return;
+
+    selectedPiece = {
+        row: parseInt(piece.dataset.row),
+        col: parseInt(piece.dataset.col)
+    };
+
+    document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+    piece.classList.add('selected');
+
+    highlightMoves();
+}
+
+function highlightMoves() {
+    document.querySelectorAll('.possible-move').forEach(el => el.classList.remove('possible-move'));
+
+    if (!selectedPiece) return;
+
+    const { row, col } = selectedPiece;
+    const piece = gameState.board[row][col];
+    const directions = getDirections(piece);
+
+    // Captura obrigatória
+    let hasCapture = false;
+    directions.forEach(([dr, dc]) => {
+        const targetRow = row + dr * 2;
+        const targetCol = col + dc * 2;
+        const capturedRow = row + dr;
+        const capturedCol = col + dc;
+
+        if (
+            targetRow >= 0 && targetRow < 8 &&
+            targetCol >= 0 && targetCol < 8 &&
+            gameState.board[capturedRow][capturedCol] &&
+            gameState.board[capturedRow][capturedCol].toLowerCase() !== piece.toLowerCase() &&
+            !gameState.board[targetRow][targetCol]
+        ) {
+            hasCapture = true;
+            const square = getSquare(targetRow, targetCol);
+            square.classList.add('possible-move');
+        }
+    });
+
+    if (!hasCapture) {
+        directions.forEach(([dr, dc]) => {
+            const targetRow = row + dr;
+            const targetCol = col + dc;
+
+            if (
+                targetRow >= 0 && targetRow < 8 &&
+                targetCol >= 0 && targetCol < 8 &&
+                !gameState.board[targetRow][targetCol]
+            ) {
+                const square = getSquare(targetRow, targetCol);
+                square.classList.add('possible-move');
+            }
+        });
+    }
+}
+
+function movePiece(e) {
+    e.stopPropagation();
+
+    if (!gameActive || !selectedPiece || currentPlayer === 'black') return;
+
+    const targetRow = parseInt(e.currentTarget.dataset.row);
+    const targetCol = parseInt(e.currentTarget.dataset.col);
+    const fromRow = selectedPiece.row;
+    const fromCol = selectedPiece.col;
+    const piece = gameState.board[fromRow][fromCol];
+
+    if (!piece || !isValidMove(fromRow, fromCol, targetRow, targetCol, piece)) return;
+
+    const isCapture = Math.abs(targetRow - fromRow) === 2;
+    executeMove(fromRow, fromCol, targetRow, targetCol, piece, isCapture);
+
+    if (isCapture && hasAdditionalCaptures(targetRow, targetCol, piece)) {
+        selectedPiece = { row: targetRow, col: targetCol };
+        highlightMoves();
+        return;
+    }
+
+    selectedPiece = null;
+    document.querySelectorAll('.selected, .possible-move').forEach(el => el.classList.remove('selected', 'possible-move'));
+
+    currentPlayer = 'black';
+    setTimeout(() => {
+        if (gameActive) botMove();
+    }, 500);
+
+    createBoard();
+    checkGameOver();
+}
+
+function getDirections(piece) {
+    const isKing = piece === 'R' || piece === 'B';
+    const isRed = piece === 'r' || piece === 'R';
+
+    if (isKing) return [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+    if (isRed) return [[-1, -1], [-1, 1]];
+    return [[1, -1], [1, 1]];
+}
+
+function isValidMove(fr, fc, tr, tc, p) {
+    if (gameState.board[tr][tc]) return false;
+
+    const isCapture = Math.abs(tr - fr) === 2;
+    if (isCapture) {
+        const cr = (fr + tr) / 2;
+        const cc = (fc + tc) / 2;
+        return gameState.board[cr]?.[cc] && gameState.board[cr][cc].toLowerCase() !== p.toLowerCase();
+    }
+
+    const dirs = getDirections(p);
+    return dirs.some(([dr, dc]) => fr + dr === tr && fc + dc === tc);
+}
+
+function executeMove(fr, fc, tr, tc, p, isCapture) {
+    if (isCapture) {
+        const cr = (fr + tr) / 2;
+        const cc = (fc + tc) / 2;
+        gameState.board[cr][cc] = null;
+        updatePieceCount(p, true);
+    }
+
+    gameState.board[tr][tc] = p;
+    gameState.board[fr][fc] = null;
+
+    if (p === 'r' && tr === 0) gameState.board[tr][tc] = 'R';
+    if (p === 'b' && tr === 7) gameState.board[tr][tc] = 'B';
+}
+
+function hasAdditionalCaptures(r, c, p) {
+    const dirs = getDirections(p);
+    return dirs.some(([dr, dc]) => {
+        const nr = r + dr * 2;
+        const nc = c + dc * 2;
+        const cr = r + dr;
+        const cc = c + dc;
+        return (
+            nr >= 0 && nc >= 0 && nr < 8 && nc < 8 &&
+            gameState.board[cr]?.[cc] &&
+            gameState.board[cr][cc].toLowerCase() !== p.toLowerCase() &&
+            !gameState.board[nr][nc]
+        );
+    });
+}
+
+function updatePieceCount(p, isCapture) {
+    if (isCapture) {
+        if (p === 'r' || p === 'R') gameState.blackPieces--;
+        else gameState.redPieces--;
+    }
+}
+
+function checkGameOver() {
+    if (gameState.redPieces === 0) {
+        message.textContent = 'Preto vence!';
+        gameActive = false;
+    } else if (gameState.blackPieces === 0) {
+        message.textContent = 'Vermelho vence!';
+        gameActive = false;
+    }
+}
+
+function botMove() {
+    if (!gameActive) return;
+
+    const botPieces = [];
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const piece = gameState.board[row][col];
+            if (piece && (piece === 'b' || piece === 'B')) {
+                botPieces.push({ row, col, piece });
+            }
+        }
+    }
+
+    function findCaptures(pieces) {
+        const captures = [];
+        pieces.forEach(({ row, col, piece }) => {
+            const dirs = getDirections(piece);
+            dirs.forEach(([dr, dc]) => {
+                const tr = row + dr * 2;
+                const tc = col + dc * 2;
+                const cr = row + dr;
+                const cc = col + dc;
+                if (
+                    tr >= 0 && tr < 8 && tc >= 0 && tc < 8 &&
+                    gameState.board[cr]?.[cc] &&
+                    gameState.board[cr][cc].toLowerCase() !== piece.toLowerCase() &&
+                    !gameState.board[tr][tc]
+                ) {
+                    captures.push({ fromRow: row, fromCol: col, targetRow: tr, targetCol: tc, piece, capturedRow: cr, capturedCol: cc });
+                }
+            });
+        });
+        return captures;
+    }
+
+    function findMoves(pieces) {
+        const moves = [];
+        pieces.forEach(({ row, col, piece }) => {
+            getDirections(piece).forEach(([dr, dc]) => {
+                const tr = row + dr;
+                const tc = col + dc;
+                if (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !gameState.board[tr][tc]) {
+                    moves.push({ fromRow: row, fromCol: col, targetRow: tr, targetCol: tc, piece });
+                }
+            });
+        });
+        return moves;
+    }
+
+    let bestMove = null;
+    const captures = findCaptures(botPieces);
+
+    if (captures.length > 0) {
+        bestMove = captures[Math.floor(Math.random() * captures.length)];
+    } else {
+        const moves = findMoves(botPieces);
+        if (moves.length > 0) {
+            bestMove = moves[Math.floor(Math.random() * moves.length)];
+        }
+    }
+
+    if (bestMove) {
+        const isCapture = !!bestMove.capturedRow;
+        executeMove(bestMove.fromRow, bestMove.fromCol, bestMove.targetRow, bestMove.targetCol, bestMove.piece, isCapture);
+
+        if (isCapture && hasAdditionalCaptures(bestMove.targetRow, bestMove.targetCol, bestMove.piece)) {
+            setTimeout(botMove, 500);
+        } else {
+            currentPlayer = 'red';
+        }
+    }
+
+    createBoard();
+    checkGameOver();
+}
+
+function getSquare(row, col) {
+    return document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+}
+
+function resetGame() {
+    gameState.board = [
+        [null, 'b', null, 'b', null, 'b', null, 'b'],
+        ['b', null, 'b', null, 'b', null, 'b', null],
+        [null, 'b', null, 'b', null, 'b', null, 'b'],
+        [null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null],
+        ['r', null, 'r', null, 'r', null, 'r', null],
+        [null, 'r', null, 'r', null, 'r', null, 'r'],
+        ['r', null, 'r', null, 'r', null, 'r', null]
+    ];
+    gameState.redPieces = 12;
+    gameState.blackPieces = 12;
+    currentPlayer = 'red';
+    gameActive = true;
+    message.textContent = '';
+    createBoard();
+}
+
+createBoard();
+  </script>
+  <div class="game-title">KnoxK210 Dev</div>
+</body>
+</html>
