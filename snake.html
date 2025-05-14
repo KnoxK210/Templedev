@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Console Retro Snake</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #000;
+      font-family: 'Courier New', monospace;
+      color: #0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .console {
+      background: #222;
+      border: 10px solid #333;
+      border-radius: 20px;
+      padding: 20px;
+      width: 90vw;
+      max-width: 420px;
+      box-shadow: 0 0 20px #0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .screen {
+      background: #000;
+      border: 4px inset #444;
+      width: 100%;
+      height: 400px;
+      position: relative;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+
+    .score {
+      color: #0f0;
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .controls .info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .buttons {
+      margin-top: 20px;
+      display: grid;
+      grid-template-areas:
+        ". up ."
+        "left . right"
+        ". down .";
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-gap: 10px;
+      width: 80%;
+      justify-items: center;
+    }
+
+    .buttons button {
+      background: #333;
+      color: #0f0;
+      border: 2px solid #0f0;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .buttons button:active {
+      background: #0f0;
+      color: #000;
+    }
+
+    .btn-up { grid-area: up; }
+    .btn-down { grid-area: down; }
+    .btn-left { grid-area: left; }
+    .btn-right { grid-area: right; }
+  </style>
+</head>
+<body>
+  <div class="console">
+    <div class="controls">
+      <div class="info">
+        <div class="score" id="score">Pontuação: 0</div>
+        <label>
+          Dificuldade:
+          <select id="difficulty" onchange="changeDifficulty()" style="margin-left:10px; background:#000; color:#0f0; border:1px solid #0f0;">
+            <option value="200">Fácil</option>
+            <option value="150" selected>Médio</option>
+            <option value="100">Difícil</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div id="game-over" style="display:none; position:absolute; top:45%; left:50%; transform:translate(-50%,-50%); color:red; font-size:24px; font-weight:bold;">Game Over!</div>
+      <canvas id="game" width="400" height="400"></canvas>
+    </div>
+
+    <div class="buttons">
+      <button class="btn-up" onclick="changeDirection('up')">↑</button>
+      <button class="btn-left" onclick="changeDirection('left')">←</button>
+      <button class="btn-right" onclick="changeDirection('right')">→</button>
+      <button class="btn-down" onclick="changeDirection('down')">↓</button>
+    </div>
+  </div>
+
+  <audio id="eat-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+  <audio id="gameover-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
+    const eatSound = document.getElementById('eat-sound');
+    const gameOverSound = document.getElementById('gameover-sound');
+    const difficultySelect = document.getElementById('difficulty');
+    const gameOverMessage = document.getElementById('game-over');
+
+    const scale = 20;
+    const rows = canvas.height / scale;
+    const columns = canvas.width / scale;
+
+    let snake, food, score = 0, gameRunning = true;
+    let gameInterval;
+
+    class Snake {
+      constructor() {
+        this.body = [{ x: 5, y: 5 }];
+        this.xSpeed = 1;
+        this.ySpeed = 0;
+      }
+
+      draw() {
+        ctx.fillStyle = "#0f0";
+        this.body.forEach(segment => {
+          ctx.fillRect(segment.x * scale, segment.y * scale, scale, scale);
+        });
+      }
+
+      update() {
+        const head = { x: this.body[0].x + this.xSpeed, y: this.body[0].y + this.ySpeed };
+        this.body.unshift(head);
+
+        if (head.x === food.x && head.y === food.y) {
+          score++;
+          scoreDisplay.textContent = "Pontuação: " + score;
+          eatSound.play();
+          createFood();
+        } else {
+          this.body.pop();
+        }
+      }
+
+      changeDirection(dir) {
+        switch (dir) {
+          case 'up':
+            if (this.ySpeed === 0) { this.xSpeed = 0; this.ySpeed = -1; }
+            break;
+          case 'down':
+            if (this.ySpeed === 0) { this.xSpeed = 0; this.ySpeed = 1; }
+            break;
+          case 'left':
+            if (this.xSpeed === 0) { this.xSpeed = -1; this.ySpeed = 0; }
+            break;
+          case 'right':
+            if (this.xSpeed === 0) { this.xSpeed = 1; this.ySpeed = 0; }
+            break;
+        }
+      }
+
+      checkCollision() {
+        const head = this.body[0];
+        const collided = 
+          head.x < 0 || head.y < 0 ||
+          head.x >= columns || head.y >= rows ||
+          this.body.slice(1).some(seg => seg.x === head.x && seg.y === head.y);
+
+        if (collided) {
+          gameOverSound.play();
+          gameRunning = false;
+          gameOverMessage.style.display = 'block';
+          clearInterval(gameInterval);
+
+          setTimeout(() => {
+            resetGame();
+          }, 2000);
+        }
+      }
+    }
+
+    function createFood() {
+      food = {
+        x: Math.floor(Math.random() * columns),
+        y: Math.floor(Math.random() * rows)
+      };
+    }
+
+    function drawFood() {
+      ctx.fillStyle = "#f00";
+      ctx.fillRect(food.x * scale, food.y * scale, scale, scale);
+    }
+
+    function changeDirection(direction) {
+      snake.changeDirection(direction);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') changeDirection('up');
+      else if (e.key === 'ArrowDown') changeDirection('down');
+      else if (e.key === 'ArrowLeft') changeDirection('left');
+      else if (e.key === 'ArrowRight') changeDirection('right');
+    });
+
+    function startGame(speed) {
+      clearInterval(gameInterval);
+      snake = new Snake();
+      createFood();
+      score = 0;
+      scoreDisplay.textContent = "Pontuação: 0";
+      gameOverMessage.style.display = 'none';
+      gameRunning = true;
+
+      gameInterval = setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (gameRunning) {
+          snake.update();
+          snake.draw();
+          drawFood();
+          snake.checkCollision();
+        }
+      }, speed);
+    }
+
+    function changeDifficulty() {
+      const speed = parseInt(difficultySelect.value);
+      startGame(speed);
+    }
+
+    function resetGame() {
+      score = 0;
+      scoreDisplay.textContent = "Pontuação: 0";
+      gameOverMessage.style.display = 'none';
+      gameRunning = true;
+      startGame(parseInt(difficultySelect.value));
+    }
+
+    // Inicialização
+    startGame(parseInt(difficultySelect.value));
+  </script>
+</body>
+</html>
