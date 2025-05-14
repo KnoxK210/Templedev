@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogo de Damas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #00008B, black);
+      text-align: center;
+      border: 4px solid yellow;
+      border-radius: 12px;
+    }
+
+    h1 {
+      margin: 20px;
+      color: white;
+    }
+
+    #controls {
+      margin: 15px 0;
+    }
+
+    #message {
+      color: red;
+      font-weight: bold;
+      height: 20px;
+    }
+
+    label {
+      background: black;
+      color: yellow;
+      font-weight: bold;
+      padding: 5px;
+      border-radius: 5px;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      width: 95vmin;
+      height: 95vmin;
+      max-width: 100%;
+      margin: 20px auto;
+      border: 4px solid white;
+    }
+
+    .square {
+      width: 100%;
+      height: 100%;
+      background-color: #f0d9b5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .square.dark {
+      background-color: #b58863;
+    }
+
+    .piece {
+      width: 80%;
+      height: 80%;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .piece.red {
+      background-color: red;
+    }
+
+    .piece.black {
+      background-color: black;
+    }
+
+    .piece.king::after {
+      content: '★';
+      color: gold;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+    }
+
+    .selected {
+      outline: 3px solid yellow;
+    }
+
+    .valid-move {
+      background-color: rgba(0, 255, 0, 0.3) !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>Jogo de Damas</h1>
+  <div id="controls">
+    <label>
+      Dificuldade:
+      <select id="difficulty">
+        <option value="1">Fácil</option>
+        <option value="3">Médio</option>
+        <option value="5">Difícil</option>
+      </select>
+    </label>
+  </div>
+  <div id="message"></div>
+  <div id="board"></div>
+
+  <script>
+    const board = document.getElementById('board');
+    const message = document.getElementById('message');
+    let gameBoard = Array(8).fill().map(() => Array(8).fill(null));
+    let selectedPiece = null;
+    let currentPlayer = 'red';
+    let mustCapture = false;
+
+    function initGame() {
+      board.innerHTML = '';
+      gameBoard = Array(8).fill().map(() => Array(8).fill(null));
+
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+          const square = document.createElement('div');
+          square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+          square.setAttribute('data-row', row);
+          square.setAttribute('data-col', col);
+
+          if ((row + col) % 2 !== 0) {
+            if (row < 3) {
+              gameBoard[row][col] = 'black';
+              square.innerHTML = '<div class="piece black"></div>';
+            } else if (row > 4) {
+              gameBoard[row][col] = 'red';
+              square.innerHTML = '<div class="piece red"></div>';
+            }
+          }
+
+          square.addEventListener('click', handleClick);
+          square.addEventListener('touchstart', handleClick, { passive: false });
+
+          board.appendChild(square);
+        }
+      }
+
+      currentPlayer = 'red';
+      updateGameState();
+    }
+
+    function updateGameState() {
+      mustCapture = hasCaptures(currentPlayer);
+      message.textContent = mustCapture ? 'Você deve capturar uma peça!' : '';
+    }
+
+    function hasCaptures(player) {
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+          if (gameBoard[row][col]?.startsWith(player)) {
+            if (getValidMoves(row, col).some(m => m.isCapture)) return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function handleClick(e) {
+      e.preventDefault();
+      const square = e.target.closest('.square');
+      if (!square) return;
+
+      const row = parseInt(square.getAttribute('data-row'));
+      const col = parseInt(square.getAttribute('data-col'));
+
+      if (currentPlayer === 'red') {
+        if (selectedPiece) {
+          if (tryMove(selectedPiece.row, selectedPiece.col, row, col)) {
+            if (hasCapturesForPiece(row, col)) {
+              selectedPiece = { row, col };
+              highlightMoves(row, col);
+            } else {
+              selectedPiece = null;
+              currentPlayer = 'black';
+              updateGameState();
+              setTimeout(aiMove, 700);
+            }
+          } else {
+            clearHighlights();
+            selectedPiece = null;
+            updateGameState();
+          }
+        } else if (gameBoard[row][col]?.startsWith('red')) {
+          selectedPiece = { row, col };
+          highlightMoves(row, col);
+        }
+      }
+    }
+
+    function tryMove(fromRow, fromCol, toRow, toCol) {
+      const moves = getValidMoves(fromRow, fromCol);
+      const move = moves.find(m => m.row === toRow && m.col === toCol);
+      if (move) {
+        movePiece(fromRow, fromCol, toRow, toCol, move.isCapture);
+        checkPromotion(toRow, toCol);
+        return true;
+      }
+      return false;
+    }
+
+    function movePiece(fromRow, fromCol, toRow, toCol, isCapture) {
+      gameBoard[toRow][toCol] = gameBoard[fromRow][fromCol];
+      gameBoard[fromRow][fromCol] = null;
+      if (isCapture) {
+        const midRow = (fromRow + toRow) >> 1;
+        const midCol = (fromCol + toCol) >> 1;
+        gameBoard[midRow][midCol] = null;
+      }
+      updateBoard();
+    }
+
+    function updateBoard() {
+      board.querySelectorAll('.square').forEach((square, i) => {
+        const row = Math.floor(i / 8);
+        const col = i % 8;
+        const piece = gameBoard[row][col];
+        square.innerHTML = '';
+        if (piece) {
+          const classes = ['piece'];
+          if (piece.includes('red')) classes.push('red');
+          if (piece.includes('black')) classes.push('black');
+          if (piece.includes('king')) classes.push('king');
+          square.innerHTML = `<div class="${classes.join(' ')}"></div>`;
+        }
+      });
+    }
+
+    function highlightMoves(row, col) {
+      clearHighlights();
+      board.querySelector(`.square[data-row="${row}"][data-col="${col}"]`)?.classList.add('selected');
+      getValidMoves(row, col).forEach(m => {
+        const s = board.querySelector(`.square[data-row="${m.row}"][data-col="${m.col}"]`);
+        s?.classList.add('valid-move');
+      });
+    }
+
+    function clearHighlights() {
+      board.querySelectorAll('.square').forEach(s => s.classList.remove('selected', 'valid-move'));
+    }
+
+    function getValidMoves(row, col) {
+      const moves = [];
+      const piece = gameBoard[row][col];
+      if (!piece) return moves;
+
+      const isKing = piece.includes('king');
+      const player = piece.startsWith('red') ? 'red' : 'black';
+      const directions = isKing ? [-1, 1] : (player === 'red' ? [-1] : [1]);
+
+      directions.forEach(dRow => {
+        [-1, 1].forEach(dCol => {
+          let newRow = row + dRow;
+          let newCol = col + dCol;
+
+          if (isValidPosition(newRow, newCol) && !gameBoard[newRow][newCol]) {
+            if (!mustCapture) moves.push({ row: newRow, col: newCol, isCapture: false });
+          }
+
+          let midRow = row + dRow;
+          let midCol = col + dCol;
+          let jumpRow = row + 2 * dRow;
+          let jumpCol = col + 2 * dCol;
+
+          if (
+            isValidPosition(jumpRow, jumpCol) &&
+            gameBoard[midRow] &&
+            gameBoard[midRow][midCol] &&
+            gameBoard[midRow][midCol].startsWith(player === 'red' ? 'black' : 'red') &&
+            !gameBoard[jumpRow][jumpCol]
+          ) {
+            moves.push({ row: jumpRow, col: jumpCol, isCapture: true });
+          }
+        });
+      });
+
+      return moves;
+    }
+
+    function isValidPosition(row, col) {
+      return row >= 0 && row < 8 && col >= 0 && col < 8 && (row + col) % 2 !== 0;
+    }
+
+    function checkPromotion(row, col) {
+      const piece = gameBoard[row][col];
+      if ((piece === 'red' && row === 0) || (piece === 'black' && row === 7)) {
+        gameBoard[row][col] += '-king';
+        updateBoard();
+      }
+    }
+
+    function hasCapturesForPiece(row, col) {
+      return getValidMoves(row, col).some(m => m.isCapture);
+    }
+
+    function aiMove() {
+      const allMoves = [];
+
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+          if (gameBoard[row][col]?.startsWith('black')) {
+            const moves = getValidMoves(row, col);
+            moves.forEach(move => {
+              allMoves.push({
+                from: { row, col },
+                to: move,
+                isCapture: move.isCapture
+              });
+            });
+          }
+        }
+      }
+
+      const captureMoves = allMoves.filter(m => m.isCapture);
+      const kingMoves = allMoves.filter(m =>
+        m.to.row === 7 && gameBoard[m.from.row][m.from.col] === 'black'
+      );
+
+      let selectedMove;
+      if (captureMoves.length > 0) {
+        selectedMove = captureMoves[Math.floor(Math.random() * captureMoves.length)];
+      } else if (kingMoves.length > 0) {
+        selectedMove = kingMoves[Math.floor(Math.random() * kingMoves.length)];
+      } else if (allMoves.length > 0) {
+        selectedMove = allMoves[Math.floor(Math.random() * allMoves.length)];
+      }
+
+      if (selectedMove) {
+        setTimeout(() => {
+          movePiece(
+            selectedMove.from.row,
+            selectedMove.from.col,
+            selectedMove.to.row,
+            selectedMove.to.col,
+            selectedMove.isCapture
+          );
+          checkPromotion(selectedMove.to.row, selectedMove.to.col);
+
+          if (
+            selectedMove.isCapture &&
+            hasCapturesForPiece(selectedMove.to.row, selectedMove.to.col)
+          ) {
+            setTimeout(aiMove, 500); // captura em sequência
+          } else {
+            currentPlayer = 'red';
+            updateGameState();
+          }
+        }, 500);
+      }
+    }
+
+    window.onload = initGame;
+  </script>
+</body>
+</html>
