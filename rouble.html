@@ -81,6 +81,22 @@
       background-color: #357ae8;
     }
   </style>
+   <audio id="musica" src="https://github.com/KnoxK210/Templedev/raw/refs/heads/main/music.wav"></audio>     
+  <script>
+    let tocou = false;
+
+function tocarMusicaAoClicar() {
+  if (!tocou) {
+    const audio = document.getElementById('musica');
+    audio.play().catch((e) => {
+      console.log("Reprodução bloqueada até interação do usuário.");
+    });
+    tocou = true;
+  }
+}
+
+document.addEventListener('click', tocarMusicaAoClicar);
+  </script>    
 </head>
 <body>
   
@@ -94,7 +110,7 @@
   </div>
 
   <div class="pato-container">
-    <img src="https://codeberg.org/Konan/Gamejump/raw/branch/main/lula.gif"
+    <img src="https://raw.githubusercontent.com/KnoxK210/j0go/refs/heads/main/lula.gif"
          alt="Lula ladrao" class="pato">
   </div>
 
