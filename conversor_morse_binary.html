@@ -1,0 +1,235 @@
+<!DOCTYPE html><html lang="pt-br"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morse code Translator</title> 
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: white;
+    }
+    img{
+        border-radius: 0 30px 0 30px;
+        border:2px solid red;
+    }
+    .container {
+        background-color: rgba(0, 0, 0, 0.85);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00;
+        border: 1px solid #00ff00;
+        color: #00ff00;
+    }
+    textarea {
+        width: 100%;
+        height: 100px;
+        margin: 10px 0;
+        padding: 10px;
+        resize: vertical;
+    }
+    button {
+        background-color: #4CA220;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+    }
+    button:hover {
+        background-color: #45a049;
+    }
+    .btn-group {
+        display: flex;
+        justify-content: space-between;
+    }
+    #matrix {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        background: black;
+    }
+    #morseInput, #textInput, #binTextInput, #binaryOutput {
+        width: 300px;
+        height: 80px;
+    }
+</style>
+</head><body>
+<center><img id="foto" src="https://miro.medium.com/v2/resize:fit:1098/format:webp/1*R3K7IAXQ8ojIgZaP8ZLEGg.jpeg" width="210" height="100"></center>
+<div class="container">
+    <h2>Tradutor de Código Morse</h2><div>
+    <h3>Texto para Morse:</h3>
+    <textarea id="textInput" placeholder="Digite aqui"></textarea>
+    <div class="btn-group">
+        <button onclick="textToMorse()">traduzir para morse</button>
+        <button onclick="playMorse()">▶️ Morse</button>
+        <button onclick="clearAll()">Apagar</button>
+    </div>
+</div>
+
+<div>
+    <h3>Morse para texto:</h3>
+    <textarea id="morseInput" placeholder="Digite o codigo aqui"></textarea>
+    <button onclick="morseToText()">Traduzir para texto</button>
+</div>
+    <details>
+        <summary> Conversor de código binario</summary>
+<div>
+    <h3>Texto para Binário:</h3>
+    <textarea id="binTextInput" placeholder="Digite o texto para converter em binário"></textarea>
+    <div class="btn-group">
+        <button onclick="textToBinary()">Converter para Binário</button>
+        <button onclick="binaryToText()">Binário para Texto</button>
+    </div>
+    <textarea id="binaryOutput" placeholder="Resultado em binário" ></textarea>
+</div>
+
+<div id="result"></div>
+
+</div>
+</details>
+<script>
+    const morseCode = {
+        'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.',
+        'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---',
+        'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---',
+        'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+        'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--',
+        'Z': '--..', '0': '-----', '1': '.----', '2': '..---', '3': '...--',
+        '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
+        '9': '----.', ' ': '/', '.': '.-.-.-', ',': '--..--', '?': '..--..',
+        "'": '.----.', '!': '-.-.--', '/': '-..-.', '(': '-.--.', ')': '-.--.-',
+        '&': '.-...', ':': '---...', ';': '-.-.-.', '=': '-...-', '+': '.-.-.',
+        '-': '-....-', '_': '..--.-', '"': '.-..-.', '$': '...-..-', '@': '.--.-.'
+    };
+
+    const reverseMorse = Object.fromEntries(Object.entries(morseCode).map(([k, v]) => [v, k]));
+
+    function mudarImagem() {
+        const img = document.getElementById('foto');
+        const nova = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGlecEOfLDvmzsPNWE2LCcbZkgNVRHwjOgSrKy3fXie6yAm5To5uQ6LpU&s=10";
+        const original = "https://miro.medium.com/v2/resize:fit:1098/format:webp/1*R3K7IAXQ8ojIgZaP8ZLEGg.jpeg";
+        img.src = nova;
+        setTimeout(() => { img.src = original; }, 5000);
+    }
+
+    function textToMorse() {
+        mudarImagem();
+        const text = document.getElementById('textInput').value.toUpperCase();
+        let morse = '';
+        for (let char of text) {
+            morse += morseCode[char] ? morseCode[char] + ' ' : '# ';
+        }
+        document.getElementById('morseInput').value = morse.trim();
+        showResult('Tradução concluída!');
+    }
+
+    function morseToText() {
+        mudarImagem();
+        const morse = document.getElementById('morseInput').value.split(' ');
+        let text = '';
+        for (let code of morse) {
+            if (reverseMorse[code]) text += reverseMorse[code];
+            else if (code === '/') text += ' ';
+            else text += '#';
+        }
+        document.getElementById('textInput').value = text.toLowerCase();
+        showResult('Tradução concluída!');
+    }
+
+    function playMorse() {
+        mudarImagem();
+        const morse = document.getElementById('morseInput').value;
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 600;
+        let time = context.currentTime;
+        morse.split('').forEach(symbol => {
+            switch(symbol) {
+                case '.': gainNode.gain.setValueAtTime(1, time); time += 0.1; gainNode.gain.setValueAtTime(0, time); time += 0.1; break;
+                case '-': gainNode.gain.setValueAtTime(1, time); time += 0.3; gainNode.gain.setValueAtTime(0, time); time += 0.1; break;
+                case ' ': time += 0.2; break;
+                case '/': time += 0.4; break;
+            }
+        });
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), (time - context.currentTime) * 1000);
+    }
+
+    function clearAll() {
+        mudarImagem();
+        document.getElementById('textInput').value = '';
+        document.getElementById('morseInput').value = '';
+        document.getElementById('binTextInput').value = '';
+        document.getElementById('binaryOutput').value = '';
+        showResult('');
+    }
+
+    function showResult(message) {
+        document.getElementById('result').innerHTML = message;
+    }
+
+    function textToBinary() {
+        mudarImagem();
+        const text = document.getElementById('binTextInput').value;
+        let binary = '';
+        for (let i = 0; i < text.length; i++) {
+            binary += text[i].charCodeAt(0).toString(2).padStart(8, '0') + ' ';
+        }
+        document.getElementById('binaryOutput').value = binary.trim();
+        showResult('Texto convertido para binário!');
+    }
+
+    function binaryToText() {
+        mudarImagem();
+        const binary = document.getElementById('binaryOutput').value.trim().split(' ');
+        let text = '';
+        for (let b of binary) {
+            if (b.length === 8) text += String.fromCharCode(parseInt(b, 2));
+            else text += '#';
+        }
+        document.getElementById('binTextInput').value = text;
+        showResult('Binário convertido para texto!');
+    }
+</script>
+
+<canvas id="matrix"></canvas>
+<script>
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    const letters = 'アァイィウヴエカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array.from({ length: columns }).fill(1);
+
+    function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0F0';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+            const text = letters.charAt(Math.floor(Math.random() * letters.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setInterval(draw, 35);
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+</script>
+</body>
+</html>
