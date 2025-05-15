@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Versículo do Dia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, #00ffcc, #3366ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    p {
+      max-width: 600px;
+      text-align: center;
+      font-size: 1rem;
+      animation: fadeIn 3s ease-in-out;
+    }
+
+    textarea {
+      width: 90%;
+      max-width: 600px;
+      height: 200px;
+      margin-top: 2rem;
+      padding: 1rem;
+      font-size: 1rem;
+      resize: none;
+      background: #1c1f2b;
+      color: #00ffc3;
+      border: 3px solid transparent;
+      border-radius: 15px;
+      background-clip: padding-box;
+      animation: borderGlow 5s linear infinite;
+    }
+
+    button {
+      margin-top: 1rem;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #00ffcc, #3366ff);
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .knoxk {
+      margin-top: 2rem;
+      font-size: 2.2rem;
+      font-family: 'Press Start 2P', monospace;
+      color: #00ff99;
+      text-shadow:
+        1px 1px 0 #000,
+        2px 2px 0 #000,
+        3px 3px 5px #0ff;
+      animation: flicker 1.5s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      40% { opacity: 0.8; }
+      50% { opacity: 0.4; }
+      60% { opacity: 0.8; }
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes borderGlow {
+      0% { border-color: #00ffcc; }
+      25% { border-color: #3366ff; }
+      50% { border-color: #cc00ff; }
+      75% { border-color: #ff3366; }
+      100% { border-color: #00ffcc; }
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      textarea {
+        height: 150px;
+      }
+
+      .knoxk {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Versículo do dia para você</h1>
+  <p>Este é um gerador aleatório de versículos bíblicos - ao todo, são 33 versículos. Não tente gerar mais de 1 versículo, pois perderá o valor inspirado da mensagem.</p>
+
+  <textarea id="versiculo" readonly>Pressione o botão abaixo para receber o versículo inspirado.</textarea>
+  <button onclick="gerarVersiculo()">Gerar Versículo</button>
+
+  <div class="knoxk">KnoxK210 Dev</div>
+
+  <script>
+    const versiculos = [
+      "Salmos 23:1 - O Senhor é o meu pastor; nada me faltará.",
+      "João 3:16 - Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito.",
+      "Filipenses 4:13 - Posso todas as coisas naquele que me fortalece.",
+      "Provérbios 3:5 - Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.",
+      "Romanos 8:28 - Sabemos que todas as coisas cooperam para o bem daqueles que amam a Deus.",
+      "Isaías 41:10 - Não temas, porque eu sou contigo.",
+      "Jeremias 29:11 - Eu é que sei os pensamentos que tenho a vosso respeito, diz o Senhor.",
+      "Mateus 11:28 - Vinde a mim todos os que estais cansados e oprimidos, e eu vos aliviarei.",
+      "Salmos 91:1 - Aquele que habita no esconderijo do Altíssimo.",
+      "Gálatas 2:20 - Já estou crucificado com Cristo; e vivo, não mais eu, mas Cristo vive em mim.",
+      "Romanos 12:2 - E não vos conformeis com este mundo.",
+      "2 Coríntios 5:17 - Assim que, se alguém está em Cristo, nova criatura é.",
+      "Salmos 37:5 - Entrega o teu caminho ao Senhor; confia nele, e ele tudo fará.",
+      "Tiago 1:5 - Se algum de vós tem falta de sabedoria, peça-a a Deus.",
+      "1 Pedro 5:7 - Lançando sobre ele toda a vossa ansiedade, porque ele tem cuidado de vós.",
+      "Hebreus 11:1 - Ora, a fé é o firme fundamento das coisas que se esperam.",
+      "Salmos 46:1 - Deus é o nosso refúgio e fortaleza.",
+      "João 14:6 - Eu sou o caminho, e a verdade e a vida.",
+      "Salmos 119:105 - Lâmpada para os meus pés é tua palavra.",
+      "Isaías 40:31 - Mas os que esperam no Senhor renovarão as forças.",
+      "Provérbios 16:3 - Confia ao Senhor as tuas obras.",
+      "Salmos 27:1 - O Senhor é a minha luz e a minha salvação.",
+      "Colossenses 3:2 - Pensai nas coisas que são de cima.",
+      "Mateus 6:33 - Buscai primeiro o Reino de Deus.",
+      "Romanos 5:8 - Mas Deus prova o seu amor para conosco.",
+      "João 16:33 - No mundo tereis aflições, mas tende bom ânimo.",
+      "Efésios 6:11 - Revesti-vos de toda a armadura de Deus.",
+      "Salmos 34:8 - Provai e vede que o Senhor é bom.",
+      "2 Timóteo 1:7 - Porque Deus não nos deu o espírito de temor.",
+      "Hebreus 13:5 - Nunca te deixarei, nunca te abandonarei.",
+      "Josué 1:9 - Sê forte e corajoso.",
+      "Apocalipse 3:20 - Eis que estou à porta e bato.",
+      "Salmos 100:4 - Entrai pelas portas dele com gratidão.",
+      "1 João 4:8 - Deus é amor."
+    ];
+
+    function gerarVersiculo() {
+      const index = Math.floor(Math.random() * versiculos.length);
+      document.getElementById("versiculo").value = versiculos[index];
+    }
+  </script>
+</body>
+</html>
